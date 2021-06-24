@@ -15,6 +15,10 @@ BASE_URL = "https://rmz.cr/l/m"
 LINK_BASE_URL = "https://rmz.cr"
 MAX_PAGES = 30
 
+# create out directory if not existing in current directory
+if not os.path.exists("out"):
+    os.mkdir("out")
+
 # generate a filename based on datetime
 dt = datetime.datetime.now()
 filename = "out\\RMZ_" + dt.strftime("%m%d%Y_%H%M") + ".html"
