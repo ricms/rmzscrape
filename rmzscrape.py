@@ -56,7 +56,7 @@ while page <= MAX_PAGES:
         link = anchor.attrs['href'].split('?')[0]
 
         # if link is bookmarked before, set this as the last page 
-        if link.upper == last_link:
+        if link.upper() == last_link:
             page = MAX_PAGES
 
         # filter out - only take those with "MP3" in the title
