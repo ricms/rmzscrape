@@ -3,17 +3,24 @@
    Description: extract "MP3" format movies from rapidmoviez website and
                 create an HTML file listing those movies and their link
    Author     : ricS
-   Date       : 24 June 2021
+
+   History
+     24 June 2021 - First Written
+     19 July 2021 - Add filter: exclude documentary genre
+
 '''
 
 import datetime
 import os
+
+from requests.models import to_native_string
 from requests_html import HTML, HTMLSession
 
 # constants
 BASE_URL = "https://rmz.cr/l/m"
 LINK_BASE_URL = "https://rmz.cr"
 MAX_PAGES = 30
+DOCUMENTARY_GENRE = "genre/documentary"
 
 # create out directory if not existing in current directory
 if not os.path.exists("out"):
@@ -52,16 +59,27 @@ while page <= MAX_PAGES:
         title = entry.text.split('\n')[0]
 
         # get link
-        anchor = entry.find('a', first=True)
+        anchor = post.find('a', first=True)
         link = anchor.attrs['href'].split('?')[0]
 
         # if link is bookmarked before, set this as the last page 
         if link.upper() == last_link:
             page = MAX_PAGES
 
-        # filter out - only take those with "MP3" in the title
-        if title.upper().find("MP3") >= 0:
-            movies.append([title, link])
+        # check genre
+        valid_genre = True
+        categories = post.find('.blog-category', first=True)
+        movietags = categories.find('a')
+        for movietag in movietags:
+            taglink = movietag.attrs['href'].lower()
+            if DOCUMENTARY_GENRE in taglink:
+                valid_genre = False
+                break
+
+        if valid_genre:
+            # filter out - only take those with "MP3" in the title
+            if title.upper().find("MP3") >= 0:
+                movies.append([title, link])
 
         # save the first entry found (so next time, we'll stop here)
         if is_first:
