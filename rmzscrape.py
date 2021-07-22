@@ -7,7 +7,7 @@
    History
      24 June 2021 - First Written
      19 July 2021 - Add filter: exclude documentary genre
-
+     22 July 2021 - Also filter "short" genre
 '''
 
 import datetime
@@ -21,6 +21,7 @@ BASE_URL = "https://rmz.cr/l/m"
 LINK_BASE_URL = "https://rmz.cr"
 MAX_PAGES = 30
 DOCUMENTARY_GENRE = "genre/documentary"
+SHORT_GENRE = "genre/short"
 
 # create out directory if not existing in current directory
 if not os.path.exists("out"):
@@ -72,7 +73,7 @@ while page <= MAX_PAGES:
         movietags = categories.find('a')
         for movietag in movietags:
             taglink = movietag.attrs['href'].lower()
-            if DOCUMENTARY_GENRE in taglink:
+            if DOCUMENTARY_GENRE in taglink or SHORT_GENRE in taglink:
                 valid_genre = False
                 break
 
