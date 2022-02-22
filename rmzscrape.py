@@ -8,10 +8,13 @@
      24 June 2021 - First Written
      19 July 2021 - Add filter: exclude documentary genre
      22 July 2021 - Also filter "short" genre
+     08 Dec 2021 - Handle no categories (Genre)
+     22 Feb 2022 - Added verify=False in session.get, disable warnings
 '''
 
 import datetime
 import os
+import urllib3
 
 from requests.models import to_native_string
 from requests_html import HTML, HTMLSession
@@ -26,6 +29,8 @@ SHORT_GENRE = "genre/short"
 # create out directory if not existing in current directory
 if not os.path.exists("out"):
     os.mkdir("out")
+
+urllib3.disable_warnings()
 
 # generate a filename based on datetime
 dt = datetime.datetime.now()
@@ -49,7 +54,7 @@ firstEntryLink = ""
 while page <= MAX_PAGES:
     print("Scanning page", page, "...")
     url = BASE_URL + '/' + str(page)
-    r = session.get(url)
+    r = session.get(url, verify=False)
     
     blogpost = r.html.find('.blog-post')
 
@@ -70,16 +75,18 @@ while page <= MAX_PAGES:
         # check genre
         valid_genre = True
         categories = post.find('.blog-category', first=True)
-        movietags = categories.find('a')
-        for movietag in movietags:
-            taglink = movietag.attrs['href'].lower()
-            if DOCUMENTARY_GENRE in taglink or SHORT_GENRE in taglink:
-                valid_genre = False
-                break
+        if categories is not None:
+            movietags = categories.find('a')
+            for movietag in movietags:
+                taglink = movietag.attrs['href'].lower()
+                if DOCUMENTARY_GENRE in taglink or SHORT_GENRE in taglink:
+                    valid_genre = False
+                    break
 
         if valid_genre:
             # filter out - only take those with "MP3" in the title
-            if title.upper().find("MP3") >= 0:
+            if title.upper().find("MP3") >= 0 or title.upper().find("X264-ION10") >= 0 :
+            #if title.upper().find("MP3") >= 0 :
                 movies.append([title, link])
 
         # save the first entry found (so next time, we'll stop here)
